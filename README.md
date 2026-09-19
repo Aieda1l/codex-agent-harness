@@ -572,7 +572,7 @@ If `codex-chatgpt-web` changes its protocol behavior in a future release, follow
 Use it directly:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/codex-agent-harness.git
+git clone https://github.com/Aieda1l/codex-agent-harness.git
 cd codex-agent-harness
 ```
 
@@ -1246,7 +1246,7 @@ Add a `LICENSE` file before publishing if you want others to reuse or modify the
 
 ```bash
 # Clone
-git clone https://github.com/YOUR_USERNAME/codex-agent-harness.git
+git clone https://github.com/Aieda1l/codex-agent-harness.git
 cd codex-agent-harness
 
 # Configure mixed-backend subagents
