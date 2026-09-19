@@ -1,0 +1,43 @@
+# Project-local Codex orchestration settings.
+# Requires a trusted project plus codex-chatgpt-web with the ChatGPT Web models installed.
+# The launcher owns provider routing and the Compatibility V1 protocol flags; do not duplicate them here.
+
+# Primary/orchestrator model: native Codex GPT-6 Astra.
+model = "gpt-6-astra"
+model_reasoning_effort = "max"
+plan_mode_reasoning_effort = "max"
+model_reasoning_summary = "auto"
+model_verbosity = "medium"
+
+# Keep /review off Astra and on the same quota-separate ChatGPT Web High route used by agents.
+review_model = "chatgpt-web/high"
+
+[agents]
+enabled = true
+# Enough parallelism for exploration/review plus a few independent implementation tasks,
+# without encouraging uncontrolled fan-out.
+max_concurrent_threads_per_session = 6
+# Safety rail: any untyped child still lands on ChatGPT Web High.
+default_subagent_model = "chatgpt-web/high"
+default_subagent_reasoning_effort = "high"
+interrupt_message = true
+
+[agents.explorer]
+description = "Read-only Sol High agent for tracing code paths, gathering evidence, discovering commands, and targeted research before changes."
+config_file = "agents/explorer.toml"
+
+[agents.planner]
+description = "Sol High planning agent that turns approved scope/specs into small executable plans with per-task verification."
+config_file = "agents/planner.toml"
+
+[agents.implementer]
+description = "Sol High implementation agent for one bounded plan task using minimal changes, tests, and local verification."
+config_file = "agents/implementer.toml"
+
+[agents.reviewer]
+description = "Read-only Sol High reviewer. Spawn fresh instances for spec-compliance and code-quality review passes."
+config_file = "agents/reviewer.toml"
+
+[agents.verifier]
+description = "Sol High verification agent that runs milestone/release gates and reports evidence without self-approving implementation."
+config_file = "agents/verifier.toml"
