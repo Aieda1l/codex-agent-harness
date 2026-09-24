@@ -1,79 +1,142 @@
-# One-Time Orchestrator Setup
+# One-Time Harness Setup
 
-This repository assumes:
+This repository supports two independent coding-agent harnesses that share the same durable `docs/` project record.
+
+## Codex
+
+Expected topology:
 
 - **Primary/orchestrator:** native Codex `gpt-6-astra`.
 - **Children:** only `chatgpt-web/high` through `miuuyy/codex-chatgpt-web` Full Harness.
-- **Methodology:** Superpowers for brainstorming, planning, TDD, subagent execution, review, debugging, verification, and branch finishing.
+- **Methodology:** use Superpowers when its planning, TDD, debugging, review, verification, or branch-finishing skills add value.
 
-## 1. Install Superpowers in Codex
-
-Current Codex versions expose Superpowers in the plugin marketplace:
+### 1. Install Superpowers in Codex
 
 1. Open `/plugins` in Codex.
-2. Search for `Superpowers`.
-3. Install the plugin.
-4. Start a fresh Codex task/session after installation.
-
-Verify by asking Codex which Superpowers skills are available or by invoking a task that should trigger `brainstorming` / `writing-plans`.
+2. Find and install `Superpowers`.
+3. Start a fresh Codex task/session.
 
 Project: https://github.com/obra/superpowers
 
-## 2. Install and connect codex-chatgpt-web
+### 2. Install and connect codex-chatgpt-web
 
 Project: https://github.com/miuuyy/codex-chatgpt-web
 
 Use the latest release for your OS. In the launcher:
 
-1. Sign into your own ChatGPT account and run the browser smoke test.
-2. Install the ChatGPT Web model entries into Codex, then fully restart Codex once.
+1. Sign into your ChatGPT account and run its browser smoke test.
+2. Install the ChatGPT Web model entries into Codex, then restart Codex.
 3. Complete **Full harness (MCP)** setup.
-4. Create the ChatGPT Developer Mode Tunnel connector named exactly `Codex Native2`, with Authentication `None` and the permissions required for the harness.
+4. Create the ChatGPT Developer Mode Tunnel connector named exactly `Codex Native2`, with Authentication `None` and the permissions required by the harness.
 5. Run the launcher's runtime/doctor verification.
 6. Confirm `ChatGPT Web — High` is present and working from Codex.
 
-## 3. Use Compatibility V1 for this mixed model topology
-
-This kit intentionally uses a native Astra parent and routed ChatGPT Web children. Select Compatibility V1:
+### 3. Use Compatibility V1 for the mixed topology
 
 ```bash
 codex-chatgpt-web subagents compatibility-v1
 codex-chatgpt-web subagents status
 ```
 
-Then fully restart Codex and start a **new task**. The bridge documents protocol selection as task-pinned.
+Restart Codex and start a **new task** after changing protocol mode. Do not duplicate bridge-owned protocol flags in `.codex/config.toml`.
 
-Do not manually duplicate the bridge-owned multi-agent protocol flags in this repository's `.codex/config.toml`; the launcher journals/manages them.
+### 4. Trust the project config
 
-## 4. Trust the project config
+Codex loads project-local `.codex/config.toml` and agent files for trusted projects. Start from the repository root.
 
-Codex only loads project-local `.codex/config.toml` and project-local agent files for trusted projects. Make sure this repository is trusted in Codex, then start a new task from the repository root.
-
-Expected primary config:
+Expected configuration:
 
 - model: `gpt-6-astra`
 - reasoning: `max`
 - subagent default: `chatgpt-web/high`
 - subagent reasoning: `high`
 
-If your installed Codex build rejects `model_reasoning_effort = "max"`, temporarily use `xhigh` and update Codex; current Astra itself supports `max`.
+If your installed Codex build rejects `model_reasoning_effort = "max"`, update Codex; as a temporary compatibility fallback, use the highest effort your installed build supports.
 
-## 5. Smoke-test model isolation
+### 5. Smoke-test isolation
 
-Before a long run, perform a tiny mixed-model test:
+Before a long run:
 
-1. Ask the Astra orchestrator to report its selected model/session config.
-2. Ask it to spawn an `explorer` that reads a harmless repository file and returns the first heading.
-3. Confirm the child is shown as the ChatGPT Web High route, not Astra/Pro/native fallback.
-4. Run one `reviewer` read-only task.
-5. Run one `implementer` task on a disposable branch/worktree or a trivial documentation edit, then revert it if desired.
+1. Confirm the orchestrator reports `gpt-6-astra`.
+2. Spawn `explorer` on a harmless read-only task and confirm the child uses `chatgpt-web/high`.
+3. Run one read-only reviewer task.
+4. Run one implementer task on a disposable change and verify its route.
 
-If `chatgpt-web/high` is unavailable, fix the bridge/account/runtime setup. Do not weaken the model-isolation rule by allowing fallback children.
+If `chatgpt-web/high` is unavailable, fix the bridge/account/runtime setup. Do not silently allow another child route.
 
-## 6. Start a real project
+---
 
-For a new or poorly documented repository, the first orchestrator prompt can simply be:
+## Claude Code — Opus 5.5 + Ultracode
 
-> Initialize this repository using AGENTS.md. Establish the baseline, fill only the project context you can support with evidence, identify the smallest MVP milestone, and use Superpowers to plan and execute it with verification gates.
+Expected topology:
 
-The workflow should then keep `docs/PROJECT_STATE.md` current so future sessions can resume without replaying the whole conversation.
+- **Main session:** `claude-opus-5-5`.
+- **Baseline effort:** `xhigh` via `.claude/settings.json`.
+- **Preferred mode for substantive work:** **Ultracode**.
+- **Project subagents:** `.claude/agents/*.md`, pinned to Opus 5.5 at `xhigh`.
+- **Durable state:** the same `docs/` files used by Codex.
+
+### 1. Use a current Claude Code build
+
+The harness relies on project `CLAUDE.md`, `.claude/settings.json`, custom project subagents, and current subagent frontmatter such as `effort` / `omitClaudeMd`. Update Claude Code before using the harness if these fields are not recognized.
+
+Run from the repository root:
+
+```bash
+claude
+```
+
+Then use `/status` to confirm the project settings file loaded and `/context` to confirm `CLAUDE.md` is present.
+
+### 2. Confirm the model and effort
+
+`.claude/settings.json` pins:
+
+```json
+{
+  "model": "claude-opus-5-5",
+  "effortLevel": "xhigh",
+  "autoMemoryEnabled": false
+}
+```
+
+Project auto memory is disabled deliberately: long-lived product/project facts belong in `docs/`, where both harnesses can see and review them.
+
+### 3. Enable Ultracode for substantive sessions
+
+Ultracode is a **session setting**, not a model ID and not a persistent project JSON key. In the Claude Code effort menu, select **Ultracode** when you want Opus 5.5 at `xhigh` plus automatic dynamic-workflow orchestration.
+
+Use it for large migrations, repo-wide audits, broad debugging, or work that benefits from independent fan-out and cross-checking. Leave it off for small mechanical changes where a dynamic workflow would only add overhead.
+
+If Ultracode is unavailable on your account/build, remain on Opus 5.5 `xhigh` and use the project subagents directly.
+
+### 4. Smoke-test project subagents
+
+Ask Claude to run small tasks through:
+
+- `explorer`
+- `planner`
+- `implementer`
+- `spec-reviewer`
+- `quality-reviewer`
+- `verifier`
+
+Confirm the agents are discovered from `.claude/agents/`, use Opus 5.5, and respect their tool boundaries. The custom agents set `omitClaudeMd: true`, so parent prompts must include the relevant task constraints and context paths explicitly.
+
+### 5. Keep harness boundaries clean
+
+Claude Code reads `CLAUDE.md` instead of `AGENTS.md` by default when both are present. That is intentional. Do not import `AGENTS.md` into `CLAUDE.md`, because the Codex-only model routing and child-provider rules would conflict with Claude Code.
+
+---
+
+## Start a real project
+
+For either harness, first establish only what the repository supports with evidence, then identify the smallest MVP milestone and keep `docs/PROJECT_STATE.md` current.
+
+Codex starter prompt:
+
+> Initialize this repository using AGENTS.md. Establish the baseline, fill only project context you can support with evidence, identify the smallest MVP milestone, and execute it with independent review and verification gates.
+
+Claude Code starter prompt:
+
+> Initialize this repository using CLAUDE.md. Establish the baseline, fill only project context you can support with evidence, identify the smallest MVP milestone, and use the lightest appropriate combination of direct work, project subagents, and Ultracode/dynamic workflows with independent review and verification gates.

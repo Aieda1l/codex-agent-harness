@@ -23,21 +23,21 @@ default_subagent_reasoning_effort = "high"
 interrupt_message = true
 
 [agents.explorer]
-description = "Read-only Sol High agent for tracing code paths, gathering evidence, discovering commands, and targeted research before changes."
+description = "Read-only ChatGPT Web High agent for tracing code paths, gathering evidence, discovering commands, and targeted research before changes."
 config_file = "agents/explorer.toml"
 
 [agents.planner]
-description = "Sol High planning agent that turns approved scope/specs into small executable plans with per-task verification."
+description = "ChatGPT Web High planning agent that turns approved scope/specs into small executable plans with per-task verification."
 config_file = "agents/planner.toml"
 
 [agents.implementer]
-description = "Sol High implementation agent for one bounded plan task using minimal changes, tests, and local verification."
+description = "ChatGPT Web High implementation agent for one bounded plan task using minimal changes, tests, and local verification."
 config_file = "agents/implementer.toml"
 
 [agents.reviewer]
-description = "Read-only Sol High reviewer. Spawn fresh instances for spec-compliance and code-quality review passes."
+description = "Read-only ChatGPT Web High reviewer. Spawn fresh instances for spec-compliance and code-quality review passes."
 config_file = "agents/reviewer.toml"
 
 [agents.verifier]
-description = "Sol High verification agent that runs milestone/release gates and reports evidence without self-approving implementation."
+description = "ChatGPT Web High verification agent that runs milestone/release gates and reports evidence without self-approving implementation."
 config_file = "agents/verifier.toml"

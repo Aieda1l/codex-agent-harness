@@ -10,3 +10,7 @@ build/
 coverage/
 .tmp/
 tmp/
+# Claude Code machine-local overrides / transient state
+.claude/settings.local.json
+CLAUDE.local.md
+

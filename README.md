@@ -1,6 +1,6 @@
-# Codex Agent Harness
+# Codex + Claude Agent Harness
 
-A long-horizon software-development harness for Codex that combines **Superpowers**, durable project context, specialized subagents, milestone-based verification, and explicit model routing.
+A long-horizon software-development harness for **Codex and Claude Code** that combines durable project context, specialized subagents, proportional planning, milestone verification, and harness-specific model/workflow configuration.
 
 The goal is simple:
 
@@ -13,7 +13,17 @@ The harness is designed around four principles:
 - Keep the system easy to extend later.
 - Verify progress after every meaningful milestone.
 
-It uses **GPT-6 Astra** as the primary orchestrator and delegates bounded work to **GPT-5.6 Sol High** subagents through [`codex-chatgpt-web`](https://github.com/miuuyy/codex-chatgpt-web), allowing ChatGPT Web models available through your ChatGPT plan to participate in Codex workflows.
+For Codex, it uses **GPT-6 Astra** as the orchestrator and delegates bounded work through the pinned `chatgpt-web/high` route. For Claude Code, it pins **Claude Opus 5.5** at `xhigh`, provides project subagents under `.claude/agents/`, and is designed to use **Ultracode** for substantive tasks when that session mode is available.
+
+---
+
+## Two harnesses, one project record
+
+- `AGENTS.md` + `.codex/` are the **Codex-specific** orchestration contract.
+- `CLAUDE.md` + `.claude/` are the **Claude Code-specific** orchestration contract.
+- `docs/` is shared by both and remains the durable source of truth.
+
+`CLAUDE.md` intentionally does not import `AGENTS.md`, because the Codex model-routing rules are not valid Claude Code configuration. Claude Code defaults to Opus 5.5 at `xhigh`; enable **Ultracode** in the session effort menu when you want automatic dynamic-workflow orchestration. Ultracode is session-scoped, so the repository does not fake a persistent JSON setting for it.
 
 ---
 
@@ -35,7 +45,7 @@ They repeatedly rediscover architectural decisions that should have been written
 
 This harness treats those as **context and orchestration problems**, not prompt-engineering problems.
 
-Instead of putting everything into one enormous `AGENTS.md`, it divides responsibility between:
+Instead of putting everything into one enormous harness instruction file, it divides responsibility between:
 
 1. a small orchestration contract;
 2. persistent project documentation;
@@ -49,51 +59,30 @@ The repository becomes the agent's long-term memory.
 
 # Architecture
 
-The intended topology is:
+The intended topology is harness-specific but shares one durable project record:
 
 ```text
-                        ┌─────────────────────┐
-                        │    GPT-6 Astra      │
-                        │    Orchestrator     │
-                        └─────────┬───────────┘
-                                  │
-                    owns product state + routing
-                                  │
-              ┌───────────────────┼────────────────────┐
-              │                   │                    │
-              ▼                   ▼                    ▼
-        ┌───────────┐       ┌───────────┐       ┌───────────┐
-        │ Explorer  │       │  Planner  │       │ Reviewer  │
-        │ Sol High  │       │ Sol High  │       │ Sol High  │
-        └───────────┘       └───────────┘       └───────────┘
-                                  │
-                                  ▼
-                            ┌─────────────┐
-                            │ Implementer │
-                            │  Sol High   │
-                            └──────┬──────┘
-                                   │
-                     ┌─────────────┴─────────────┐
-                     ▼                           ▼
-               Spec review                Quality review
-                Sol High                    Sol High
-                     │                           │
-                     └─────────────┬─────────────┘
-                                   ▼
-                             ┌──────────┐
-                             │ Verifier │
-                             │ Sol High │
-                             └────┬─────┘
-                                  │
-                                  ▼
-                         verified milestone
+Codex                              Claude Code
+GPT-6 Astra                        Claude Opus 5.5
+(orchestrator)                     (orchestrator, xhigh / Ultracode)
+    │                                  │
+    ├─ explorer                        ├─ explorer
+    ├─ planner                         ├─ planner
+    ├─ implementer                     ├─ implementer
+    ├─ reviewer                        ├─ spec-reviewer
+    └─ verifier                        ├─ quality-reviewer
+        │                              └─ verifier
+        └──────────────┬───────────────────┘
+                       ▼
+                     docs/
+              durable project record
 ```
 
 The orchestrator keeps the strategic context.
 
 Subagents receive bounded tasks with fresh context.
 
-The repository stores everything that must survive conversation compaction, restarts, or new Codex tasks.
+The repository stores everything that must survive conversation compaction, restarts, or new Codex or Claude Code sessions.
 
 ---
 
@@ -156,7 +145,7 @@ Superpowers supplies disciplined development behaviors such as:
 
 This repository does **not** copy Superpowers skills.
 
-Instead, `AGENTS.md` instructs the orchestrator when to use them.
+Instead, the harness instruction files tell each orchestrator when to use them.
 
 That keeps the harness small while allowing Superpowers itself to evolve independently.
 
@@ -402,7 +391,7 @@ The orchestrator should delegate execution detail whenever doing so preserves it
 
 ## Explorer
 
-**Model:** ChatGPT Web — GPT-5.6 Sol High
+**Model:** ChatGPT Web — High route
 
 Used for:
 
@@ -418,7 +407,7 @@ The explorer should return evidence, not implement speculative fixes.
 
 ## Planner
 
-**Model:** ChatGPT Web — GPT-5.6 Sol High
+**Model:** ChatGPT Web — High route
 
 Used for:
 
@@ -433,7 +422,7 @@ A planner does not get permission to expand MVP scope simply because a larger ar
 
 ## Implementer
 
-**Model:** ChatGPT Web — GPT-5.6 Sol High
+**Model:** ChatGPT Web — High route
 
 Used for:
 
@@ -450,7 +439,7 @@ Parallelism is a tool, not a goal.
 
 ## Reviewer
 
-**Model:** ChatGPT Web — GPT-5.6 Sol High
+**Model:** ChatGPT Web — High route
 
 The same reviewer role is used in **fresh independent contexts** for two different reviews.
 
@@ -472,7 +461,7 @@ Keeping those reviews separate reduces the chance that elegant-but-wrong impleme
 
 ## Verifier
 
-**Model:** ChatGPT Web — GPT-5.6 Sol High
+**Model:** ChatGPT Web — High route
 
 The verifier independently executes the milestone's acceptance checks.
 
@@ -495,7 +484,7 @@ Orchestrator
 └── GPT-6 Astra
 
 Subagents
-└── ChatGPT Web — GPT-5.6 Sol High
+└── ChatGPT Web — High route
 ```
 
 The project-local Codex configuration lives in:
@@ -540,7 +529,7 @@ Native Codex Astra orchestrator
 codex-chatgpt-web
         │
         ▼
-ChatGPT Web Sol High subagents
+ChatGPT Web High-route subagents
 ```
 
 ---
@@ -576,11 +565,13 @@ git clone https://github.com/Aieda1l/codex-agent-harness.git
 cd codex-agent-harness
 ```
 
-Or copy the harness files into an existing project:
+Or copy the relevant harness files into an existing project:
 
 ```text
 AGENTS.md
+CLAUDE.md
 .codex/
+.claude/
 docs/
 ```
 
@@ -632,7 +623,7 @@ Primary:
 GPT-6 Astra
 
 Subagents:
-ChatGPT Web — GPT-5.6 Sol High
+ChatGPT Web — High route
 ```
 
 Model availability depends on the account, plan, launcher version, and current ChatGPT model availability.
@@ -960,7 +951,7 @@ The exact milestones belong in `ROADMAP.md`.
 ```text
 .
 ├── AGENTS.md
-│
+├── CLAUDE.md
 ├── .codex/
 │   ├── config.toml
 │   └── agents/
@@ -969,7 +960,15 @@ The exact milestones belong in `ROADMAP.md`.
 │       ├── implementer.toml
 │       ├── reviewer.toml
 │       └── verifier.toml
-│
+├── .claude/
+│   ├── settings.json
+│   └── agents/
+│       ├── explorer.md
+│       ├── planner.md
+│       ├── implementer.md
+│       ├── spec-reviewer.md
+│       ├── quality-reviewer.md
+│       └── verifier.md
 └── docs/
     ├── README.md
     ├── PRODUCT_BRIEF.md
@@ -982,7 +981,6 @@ The exact milestones belong in `ROADMAP.md`.
     ├── DECISIONS.md
     ├── PROJECT_STATE.md
     ├── SETUP.md
-    │
     └── plans/
         ├── active/
         └── completed/
@@ -990,43 +988,34 @@ The exact milestones belong in `ROADMAP.md`.
 
 ---
 
-# What belongs in `AGENTS.md`?
+# What belongs in the harness instruction files?
 
-`AGENTS.md` is the operating contract.
+`AGENTS.md` is the Codex operating contract. `CLAUDE.md` is the Claude Code operating contract. They should define startup behavior, delegation boundaries, role responsibilities, verification standards, and how durable state is maintained.
 
-It should answer questions like:
+They should **not** contain the entire product specification. Product intent, scope, architecture, decisions, roadmap, tests, and live project state belong in `docs/`.
 
-- What should the orchestrator read first?
-- What information is authoritative?
-- When should work be delegated?
-- Which model should perform which role?
-- When should Superpowers be invoked?
-- What counts as milestone completion?
-- When should the agent ask a human?
-- How should durable project state be maintained?
-
-It should **not** contain the entire product specification.
-
-That belongs in `docs/`.
-
-This distinction is central to keeping the harness useful over long projects.
+Keeping harness behavior separate from product state lets both agents work from the same evidence without mixing incompatible model-routing instructions.
 
 ---
 
-# Starting a fresh Codex session
+# Starting a fresh session
 
-For an existing project already using the harness, a minimal restart prompt should be enough:
+Codex:
 
 ```text
 Resume this project using AGENTS.md and docs/PROJECT_STATE.md.
+Confirm repository state against the recorded checkpoint, continue the active
+milestone or choose the next smallest approved milestone, and require the
+verification gate before completion.
+```
 
-Confirm the current repository state against the recorded checkpoint.
+Claude Code:
 
-Continue the active milestone if one exists. Otherwise select the next
-smallest roadmap milestone.
-
-Use fresh subagents for bounded work and do not mark the milestone complete
-until its verification gate passes.
+```text
+Resume this project using CLAUDE.md and docs/PROJECT_STATE.md.
+Confirm repository state against the recorded checkpoint, use the lightest
+appropriate mix of direct work, project subagents, and Ultracode, and require
+independent review plus the verification gate before completion.
 ```
 
 The project should not depend on reconstructing an old chat transcript.
@@ -1076,9 +1065,9 @@ strong inexpensive/free Web reasoning model
 bounded subagents
 ```
 
-If GPT-6 Astra or GPT-5.6 Sol High is superseded, update the `.codex` configuration while preserving the responsibility boundaries.
+If the Codex model or routed child backend changes, update `.codex/` while preserving the responsibility boundaries. If Claude Code model/workflow behavior changes, update `CLAUDE.md` and `.claude/` independently.
 
-This is why the repository is named **Codex Agent Harness**, not after a specific model generation.
+This is why the repository is named for the **agent harness**, not a specific model generation.
 
 ---
 
@@ -1244,28 +1233,33 @@ Add a `LICENSE` file before publishing if you want others to reuse or modify the
 
 ## Quick start
 
-```bash
-# Clone
-git clone https://github.com/Aieda1l/codex-agent-harness.git
-cd codex-agent-harness
+### Codex
 
-# Configure mixed-backend subagents
+```bash
 codex-chatgpt-web subagents compatibility-v1
 codex-chatgpt-web subagents status
-
-# Restart Codex and start a new task
+# Restart Codex, open this repository, and start a new task.
 ```
 
-Then tell the orchestrator:
+Then:
 
 ```text
-Initialize this repository using AGENTS.md.
+Initialize this repository using AGENTS.md and docs/PROJECT_STATE.md.
+Establish the baseline, choose the smallest useful MVP milestone, execute it
+with bounded subagents, and require independent verification before completion.
+```
 
-Establish the current project baseline, determine the smallest useful MVP
-milestone, and execute it using the documented orchestration workflow.
+### Claude Code
 
-Keep scope minimal, use fresh subagents for bounded work, and do not declare
-the milestone complete until independent verification passes.
+Start Claude Code from the repository root. `.claude/settings.json` selects Opus 5.5 at `xhigh`. For substantive work, choose **Ultracode** from the effort menu for the current session.
+
+Then:
+
+```text
+Initialize this repository using CLAUDE.md and docs/PROJECT_STATE.md.
+Establish the baseline, choose the smallest useful MVP milestone, use the
+lightest appropriate combination of direct work, subagents, and Ultracode,
+and require independent review and verification before completion.
 ```
 
 Then start shipping.
