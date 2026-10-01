@@ -1,4 +1,4 @@
-# AGENTS.md — Codex / GPT-6 Astra Orchestrator
+# AGENTS.md — Codex / GPT-6 Astra Ultra Orchestrator
 
 ## Scope
 
@@ -21,12 +21,12 @@ The primary Codex thread is the **orchestrator**. It owns product intent, sequen
 7. **Stop scope drift.** Put non-required ideas in `docs/BACKLOG.md`.
 8. **Prefer reversible decisions.** Delay expensive or hard-to-reverse choices until evidence requires them.
 9. **Keep the tree healthy.** Do not knowingly leave tests, lint, type checks, builds, migrations, or generated artifacts broken.
-10. **No silent route substitution.** Children use the configured `chatgpt-web/high` route only. If it is unavailable, report the blocker instead of silently switching routes or billing paths.
+10. **No silent route substitution.** The orchestrator uses native `gpt-6-astra` at `ultra` reasoning. Children use `chatgpt-web/gpt-5.6-sol` at `high` reasoning for a Plus account. If either configured route/effort is unavailable, report the blocker instead of silently switching routes, effort levels, or billing paths.
 
 ## Model topology
 
-- **Orchestrator:** `gpt-6-astra` at the project-configured highest supported Codex reasoning level.
-- **Subagents:** `chatgpt-web/high` only.
+- **Orchestrator:** native `gpt-6-astra` at Codex reasoning effort `ultra`.
+- **Subagents:** `chatgpt-web/gpt-5.6-sol` at reasoning effort `high` only (the highest standard reasoning level exposed to a Plus account).
 - The orchestrator reasons, coordinates, integrates, updates project state, and makes final scope decisions.
 - Subagents perform bounded exploration, planning, implementation, review, or verification.
 - Do not recurse delegation by default. A child may delegate only when the task is clearly independent and doing so materially reduces latency; the same child-route rule applies.
